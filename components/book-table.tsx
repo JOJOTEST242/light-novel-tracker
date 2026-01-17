@@ -41,8 +41,19 @@ export function BookTable({
   // Group books by yearGroup
   const booksByYear = new Map<string, { book: (typeof publisher.books)[0]; originalIndex: number }[]>()
 
-  // 先初始化所有年份分組（包含空的）
-  publisher.yearGroups.forEach((year) => {
+  const sortedYearGroups = [...publisher.yearGroups].sort((a, b) => {
+    const getMaxYear = (str: string) => {
+      const matches = str.match(/\d{4}/g)
+      if (matches) {
+        return Math.max(...matches.map(Number))
+      }
+      return 0
+    }
+    return getMaxYear(b) - getMaxYear(a) // 降序排列
+  })
+
+  // 先初始化所有年份分組（按排序後的順序）
+  sortedYearGroups.forEach((year) => {
     if (!booksByYear.has(year)) booksByYear.set(year, [])
   })
 
@@ -51,6 +62,12 @@ export function BookTable({
     if (!booksByYear.has(year)) booksByYear.set(year, [])
     booksByYear.get(year)!.push({ book, originalIndex: index })
   })
+
+  if (booksByYear.has("其他")) {
+    const otherBooks = booksByYear.get("其他")!
+    booksByYear.delete("其他")
+    booksByYear.set("其他", otherBooks)
+  }
 
   const handleEditYear = (oldYear: string) => {
     setEditingYear(oldYear)

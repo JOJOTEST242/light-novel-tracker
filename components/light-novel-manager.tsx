@@ -301,7 +301,17 @@ export function LightNovelManager() {
     setPublishers((prev) => {
       const updated = [...prev]
       if (!updated[publisherIndex].yearGroups.includes(yearGroup)) {
-        updated[publisherIndex].yearGroups.push(yearGroup)
+        updated[publisherIndex].yearGroups = [...updated[publisherIndex].yearGroups, yearGroup].sort((a, b) => {
+          // 提取年份數字進行比較
+          const getMaxYear = (str: string) => {
+            const matches = str.match(/\d{4}/g)
+            if (matches) {
+              return Math.max(...matches.map(Number))
+            }
+            return 0
+          }
+          return getMaxYear(b) - getMaxYear(a) // 降序排列
+        })
       }
       return updated
     })
